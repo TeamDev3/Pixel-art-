@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Art Drawing App</title>
+  <style>
+    :root {
+      --bg: #f4f4f9;
+      --panel-bg: #fff;
+      --border: #ddd;
+      --primary: #4a90e2;
+      --pixel-size: 15px;  /* 👈 easy control: change pixel box size here */
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      display: flex;
+    }
+
+    /* Sidebar panel */
+    .panel {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 220px;
+      margin-left: 25px;
+      background: var(--panel-bg);
+      border-right: 1px solid var(--border);
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      font-size: 20px;
+      color: var(--primary);
+    }
+
+    .panel label {
+      display: block;
+      margin: 15px 0 5px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .panel input[type="color"],
+    .panel input[type="number"] {
+      width: 100%;
+      padding: 6px;
+      box-sizing: border-box;
+    }
+
+    .panel button {
+      margin-top: 12px;
+      width: 100%;
+      padding: 10px;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .clear-btn {
+      background: #ff4d4d;
+      color: #fff;
+    }
+
+    .download-btn {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* Drawing board wrapper */
+    .board-wrap {
+      margin-left: 240px;   /* after sidebar */
+      padding: 20px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+    
+    }
+
+    /* Drawing grid */
+    .board {
+      display: grid;
+      border: 2px solid var(--border);
+      background: #fff;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+
+    .pixel {
+      border: 1px solid #eee;
+      background: #fff;
+      width: var(--pixel-size);
+      height: var(--pixel-size);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .pixel:hover {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="panel">
+    <h2>🎨 Tools</h2>
+
+    <label for="color">Pick Color:</label>
+    <input type="color" id="color" value="#4a90e2">
+
+    <label for="size">Grid Size (e.g. 16):</label>
+    <input type="number" id="size" min="8" max="64" value="16">
+
+    <button class="clear-btn" id="clear">Clear Board</button>
+    <button class="download-btn" id="download">Download Art</button>
+  </div>
+
+  <!-- Drawing board -->
+  <div class="board-wrap">
+    <div class="board" id="board"></div>
+  </div>
+
+  <script>
+    const board = document.getElementById("board");
+    const colorPicker = document.getElementById("color");
+    const sizeInput = document.getElementById("size");
+    const clearBtn = document.getElementById("clear");
+    const downloadBtn = document.getElementById("download");
+
+    let currentColor = colorPicker.value;
+    let gridSize = sizeInput.value;
+    const pixelSize = getComputedStyle(document.documentElement).getPropertyValue("--pixel-size");
+
+    // Create grid
+    function createBoard(size) {
+      board.innerHTML = "";
+      board.style.gridTemplateColumns = `repeat(${size}, ${pixelSize})`;
+      board.style.gridTemplateRows = `repeat(${size}, ${pixelSize})`;
+
+      for (let i = 0; i < size * size; i++) {
+        const pixel = document.createElement("div");
+        pixel.classList.add("pixel");
+        pixel.addEventListener("click", () => {
+          pixel.style.background = currentColor;
+        });
+        board.appendChild(pixel);
+      }
+    }
+
+    // Update color
+    colorPicker.addEventListener("input", e => {
+      currentColor = e.target.value;
+    });
+
+    // Update grid size
+    sizeInput.addEventListener("change", e => {
+      gridSize = e.target.value;
+      createBoard(gridSize);
+    });
+
+    // Clear board
+    clearBtn.addEventListener("click", () => {
+      const pixels = document.querySelectorAll(".pixel");
+      pixels.forEach(p => (p.style.background = "#fff"));
+    });
+
+    // Download art as image
+    downloadBtn.addEventListener("click", () => {
+      html2canvas(board).then(canvas => {
+        const link = document.createElement("a");
+        link.download = "pixel-art.png";
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    });
+
+    // Load default grid
+    createBoard(gridSize);
+  </script>
+
+  <!-- External lib for download -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+</body>
+</html>
