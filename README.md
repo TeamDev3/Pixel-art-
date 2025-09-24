@@ -1,1 +1,1 @@
-# 18. Pixel-art-
+# 18. Pixel-art
